@@ -12,7 +12,7 @@ env/
 build/
 develop-eggs/
 dist/
-downloads/
+downloads/*
 eggs/
 .eggs/
 lib/
@@ -87,3 +87,11 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+config.yml
+.idea/
+.DS_Store
+*.ckpt*
+*.ckpt.meta
+checkpoint
+!./model_tmp/downloads/.gitkeep
