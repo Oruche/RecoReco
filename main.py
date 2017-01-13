@@ -1,3 +1,5 @@
+import json
+
 import config
 import db
 import entity
@@ -73,40 +75,32 @@ def first_train(labels):
     db.put_item(item)
 
 
-def train_test(labels):
+def train_test():
     intelligence_id = IntelligenceID.create()
-    image_size = 56
-    data_counts = 4
-    num_classes = len(labels)
 
-    train_image, train_label = train_data.load_mock_image()
+    with open('model_sample.json', 'r') as f:
+        model_blueprint = json.load(f)
 
-    max_steps = 2
-    batch_size = 1
-    learning_rate = 0.0001
+
+    #train_image, train_label = train_data.load_mock_image()
+    train_image, train_label = train_data.prepare(model_blueprint["labels"],
+                                                  count=4,
+                                                  image_size=model_blueprint["image_size"][0],
+                                                  color=True,
+                                                  shuffle=True,
+                                                  flatten=True)
+
 
     filename = "./model_tmp/saved/" + intelligence_id + "_model.ckpt"
     model_objectkey = intelligence_id + "_model.ckpt"
     bucket = "aigomodel"
 
-    item = entity.Item(**{
-        "intelligence_id": intelligence_id,
-        "modelkey": model_objectkey,
-        "bucket": bucket,
-        "labels": labels,
-        "data_counts": data_counts,
-        "image_size": image_size,
-        "max_steps": max_steps,
-        "batch_size": batch_size,
-        "learning_rate": learning_rate,
-        "color": True
-    })
+    training.execute_train(train_image, train_label, model_blueprint, savename=filename)
 
-    training.execute_train(train_image, train_label, item, savename=filename)
 
 if __name__ == '__main__':
     config.load("dev")
-    train_test(["rice", "lemon"])
+    train_test()
     #first_train(["rice", "lemon"])
     #train("cb0f61d569e44e0186a8a378d43d6471_170111133024908199")
 

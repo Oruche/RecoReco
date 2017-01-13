@@ -3,44 +3,54 @@
   "channel": 3,
   "batch_size": 2,
   "image_size": [56, 56],
+  "labels": ["rice", "lemon"],
+  "max_steps": 20,
+  "learning_rate": 0.0001,
   "nodes": [
     {
       "name": "input",
-      "node_type": "input"
+      "input": [],
+      "op": "input",
+      "attr": {}
     },
     {
       "name": "conv1",
-      "node_type": "conv",
-      "num_out_channel": 32,
-      "activate_func": "relu",
-      "weight": {
-        "kernel": [5, 5],
-        "decay": 0.0,
-        "initializer": {
-          "type": "truncated_normal",
-          "stddev": 0.1
-        }
-      },
-      "bias": {
-        "initializer": {
-          "type": "constant",
-          "value": 0.1
+      "input": ["input"],
+      "op": "conv2d",
+      "attr": {
+        "num_out_channel": 32,
+        "activate_func": "relu",
+        "weight": {
+          "kernel": [5, 5],
+          "decay": 0.0,
+          "initializer": {
+            "type": "truncated_normal",
+            "stddev": 0.1
+          }
+        },
+        "bias": {
+          "initializer": {
+            "type": "constant",
+            "value": 0.1
+          }
         }
       }
     },
     {
       "name": "pool1",
-      "node_type": "pool",
-      "pool_type": "max",
-      "ksize": [1, 2, 2, 1],
-      "strides": [1, 2, 2, 1],
-      "padding": "SAME"
+      "input": ["conv1"],
+      "op": "max_pool",
+      "attr": {
+        "ksize": [1, 2, 2, 1],
+        "strides": [1, 2, 2, 1],
+        "padding": "SAME"
+      }
     },
     {
       "name": "norm1",
-      "node_type": "norm",
-      "norm_type": "local_response_normalization",
-      "params": {
+      "input": ["pool1"],
+      "op": "local_response_normalization",
+      "attr": {
         "depth_radius": 4,
         "bias": 1.0,
         "alpha": 0.00011111111,
@@ -49,29 +59,32 @@
     },
     {
       "name": "conv2",
-      "node_type": "conv",
-      "num_out_channel": 64,
-      "activate_func": "relu",
-      "weight": {
-        "kernel": [5, 5],
-        "decay": 0.0,
-        "initializer": {
-          "type": "truncated_normal",
-          "stddev": 0.1
-        }
-      },
-      "bias": {
-        "initializer": {
-          "type": "constant",
-          "value": 0.1
+      "input": ["norm1"],
+      "op": "conv2d",
+      "attr": {
+        "num_out_channel": 64,
+        "activate_func": "relu",
+        "weight": {
+          "kernel": [5, 5],
+          "decay": 0.0,
+          "initializer": {
+            "type": "truncated_normal",
+            "stddev": 0.1
+          }
+        },
+        "bias": {
+          "initializer": {
+            "type": "constant",
+            "value": 0.1
+          }
         }
       }
     },
     {
       "name": "norm2",
-      "node_type": "norm",
-      "norm_type": "local_response_normalization",
-      "params": {
+      "input": ["conv2"],
+      "op": "local_response_normalization",
+      "attr": {
         "depth_radius": 4,
         "bias": 1.0,
         "alpha": 0.00011111111,
@@ -80,65 +93,76 @@
     },
     {
       "name": "pool2",
-      "node_type": "pool",
-      "pool_type": "max",
-      "ksize": [1, 2, 2, 1],
-      "strides": [1, 2, 2, 1],
-      "padding": "SAME"
+      "input": ["norm2"],
+      "op": "max_pool",
+      "attr": {
+        "ksize": [1, 2, 2, 1],
+        "strides": [1, 2, 2, 1],
+        "padding": "SAME"
+      }
     },
     {
       "name": "fc1",
-      "node_type": "fc_input",
-      "neuron_counts": 1024,
-      "activate_func": "relu",
-       "weight": {
-         "decay": 0.04,
-         "initializer": {
-          "type": "truncated_normal",
-          "stddev": 0.1
-        }
-      },
-      "bias": {
-        "initializer": {
-          "type": "constant",
-          "value": 0.1
+      "input": ["pool2"],
+      "op": "fc_input",
+      "attr": {
+        "neuron_counts": 1024,
+        "activate_func": "relu",
+        "weight": {
+          "decay": 0.04,
+          "initializer": {
+            "type": "truncated_normal",
+            "stddev": 0.1
+          }
+        },
+        "bias": {
+          "initializer": {
+            "type": "constant",
+            "value": 0.1
+          }
         }
       }
     },
     {
       "name": "fc2",
-      "node_type": "fc_hidden",
-      "neuron_counts": 512,
-      "activate_func": "relu",
-       "weight": {
-         "decay": 0.04,
-         "initializer": {
-          "type": "truncated_normal",
-          "stddev": 0.1
-        }
-      },
-      "bias": {
-        "initializer": {
-          "type": "constant",
-          "value": 0.1
+      "input": ["fc1"],
+      "op": "fc_hidden",
+      "attr": {
+        "neuron_counts": 512,
+        "activate_func": "relu",
+         "weight": {
+           "decay": 0.04,
+           "initializer": {
+            "type": "truncated_normal",
+            "stddev": 0.1
+          }
+        },
+        "bias": {
+          "initializer": {
+            "type": "constant",
+            "value": 0.1
+          }
         }
       }
     },
     {
-      "name": "fc_output",
-      "node_type": "fc_output",
-      "activate_func": "softmax",
-       "weight": {
-         "decay": "no",
-         "initializer": {
-           "type": "truncated_normal",
-           "stddev": 0.1
-        }
-      },
-      "bias": {
-        "initializer": {
-          "type": "constant",
-          "value": 0.1
+      "name": "fc3",
+      "input": ["fc2"],
+      "op": "fc_output",
+      "attr": {
+        "activate_func": "softmax",
+         "weight": {
+           "decay": "no",
+           "initializer": {
+             "type": "truncated_normal",
+             "stddev": 0.1
+          }
+        },
+        "bias": {
+          "initializer": {
+            "type": "constant",
+            "value": 0.1
+          }
         }
       }
     }

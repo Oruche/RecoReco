@@ -31,21 +31,12 @@ def prepare(labels, count, image_size, color=True, shuffle=True, flatten=True):
             train_images.append(img)
             train_labels.append(p["label"])
 
-    train_num_labels = NumLabelConverter(labels).to_numlabels(train_labels)
-    return train_images, train_num_labels
+    return train_images, to_num_label(train_labels)
 
 
-class NumLabelConverter:
-
-    def __init__(self, labels):
-        self.labels = labels
-        self.label_num_dict = self._create_label_indices(labels)
-
-    def to_numlabels(self, strlabels):
-        return [self.label_num_dict[label] for label in strlabels]
-
-    def _create_label_indices(self, labels):
-        return {str(label): i for i, label in enumerate(labels)}
+def to_num_label(labels):
+    _dict = {str(label): i for i, label in enumerate(labels)}
+    return [_dict[label] for label in labels]
 
 
 class UrlLabelPairs:
@@ -64,6 +55,8 @@ class UrlLabelPairs:
     def _fetch_urls(cls, label: str, count: int):
         req_data = json.dumps({"tags": [label], "counts": count})
         resp = requests.post(config.config.search_endpoint, data=req_data)
+        if resp.status_code != 200:
+            print(resp.status_code)
         items = resp.json()["items"]
         return [cls._create_url(r["path"]) for r in items]
 

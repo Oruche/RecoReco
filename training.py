@@ -92,14 +92,14 @@ def _generate_image_and_label_batch(image, label, min_queue_examples, batch_size
     return images, label_batch
 
 
-def execute_train(images, labels, params, loadname="", savename=""):
+def execute_train(images, labels, model_blueprint, loadname="", savename=""):
 
-    image_size = params.image_size
-    max_steps = params.max_steps
-    batch_size = params.batch_size
-    learning_rate = params.learning_rate
+    image_size = model_blueprint["image_size"][0    ]
+    max_steps = model_blueprint["max_steps"]
+    batch_size = model_blueprint["batch_size"]
+    learning_rate = model_blueprint["learning_rate"]
     image_pixels = image_size * image_size * 3
-    num_class = len(params.labels)
+    num_class = len(model_blueprint["labels"])
 
     NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 2
 
@@ -139,7 +139,7 @@ def execute_train(images, labels, params, loadname="", savename=""):
 
         # inference()を呼び出してモデルを作る
         #logits = inference(x_image, keep_prob)
-        logits = cnn_inference.inference(x_image, keep_prob)
+        logits = cnn_inference.inference(x_image, keep_prob, model_blueprint)
         # loss()を呼び出して損失を計算
         loss_value = loss(logits, labels_tensor)
         # training()を呼び出して訓練
@@ -166,7 +166,7 @@ def execute_train(images, labels, params, loadname="", savename=""):
                 # batch_size分の画像に対して訓練の実行
                 batch = batch_size * i
 
-                image_ = sess.run(x_image, feed_dict={keep_prob: 0.5})
+                #image_ = sess.run(x_image, feed_dict={keep_prob: 0.5})
 
                 sess.run(train_op, feed_dict={keep_prob: 0.5})
 
